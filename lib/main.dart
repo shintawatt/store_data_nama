@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import './model/pizza.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,9 +11,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter JSON Demo - Widya', // Sesuaikan nama panggilan
+      title: 'SharedPreferences - Widya', // Sesuaikan nama panggilan
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple, // Ganti warna tema sesuai keinginan
+        primarySwatch: Colors.deepPurple,
         useMaterial3: false,
       ),
       home: const MyHomePage(),
@@ -30,53 +29,54 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Pizza> myPizzas = [];
+  int appCounter = 0;
 
   @override
   void initState() {
     super.initState();
-    readJsonFile().then((value) {
-      setState(() {
-        myPizzas = value;
-      });
+    readAndWritePreference();
+  }
+
+  Future readAndWritePreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    appCounter = prefs.getInt('appCounter') ?? 0;
+    appCounter++;
+    await prefs.setInt('appCounter', appCounter);
+    setState(() {
+      appCounter = appCounter;
     });
   }
 
-  Future<List<Pizza>> readJsonFile() async {
-    String myString = await DefaultAssetBundle.of(context)
-        .loadString('assets/pizzalist.json');
-    List pizzaMapList = jsonDecode(myString);
-    List<Pizza> myPizzas = [];
-    for (var pizza in pizzaMapList) {
-      Pizza myPizza = Pizza.fromJson(pizza);
-      myPizzas.add(myPizza);
-    }
-
-    // Mengonversi kembali List<Pizza> menjadi JSON String dan mencetaknya di Debug Console
-    String json = convertToJSON(myPizzas);
-    print(json);
-
-    return myPizzas;
-  }
-
-  String convertToJSON(List<Pizza> pizzas) {
-    return jsonEncode(pizzas.map((pizza) => jsonEncode(pizza)).toList());
+  Future deletePreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    setState(() {
+      appCounter = 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('JSON - Widya')),
-      body: ListView.builder(
-        itemCount: myPizzas.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(myPizzas[index].pizzaName),
-            subtitle: Text(
-              '${myPizzas[index].description} - \$${myPizzas[index].price}',
+      appBar: AppBar(
+        title: const Text('Shared Preferences'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'You have opened the app $appCounter times.',
+              style: const TextStyle(fontSize: 18),
             ),
-          );
-        },
+            ElevatedButton(
+              onPressed: () {
+                deletePreference();
+              },
+              child: const Text('Reset counter'),
+            ),
+          ],
+        ),
       ),
     );
   }
