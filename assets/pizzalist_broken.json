@@ -1,0 +1,19 @@
+[
+  {
+    "id": "101",
+    "pizzaName": "Margherita Broken",
+    "description": "ID dikirim sebagai String dan harga juga String",
+    "price": "8.75",
+    "imageUrl": "images/margherita.png"
+  },
+  {
+    "id": "bukan_angka",
+    "pizzaName": null,
+    "description": null,
+    "price": "gratis",
+    "imageUrl": null
+  },
+  {
+    "pizzaName": "Pepperoni Tanpa ID & Harga"
+  }
+]
